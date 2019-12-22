@@ -1,0 +1,38 @@
+# Standards: 0.1
+---
+- name: Fact istat-menus user
+  set_fact:
+    istat_menus_user: "{{ istat_menus_user | default(homebrew_user) | default(ansible_user_id) }}"
+  tags:
+    - istat-menus
+
+- become: "{{ (istat_menus_user != ansible_user_id) | bool }}"
+  become_user: "{{ istat_menus_user }}"
+  block:
+    - name: Install required package
+      ignore_errors: True
+      homebrew_cask:
+        name: istat-menus
+        greedy: True
+        options: appdir=/Applications
+        accept_external_apps: False
+        state: upgraded
+      tags:
+        - istat-menus
+
+    - name: Remove quarantine flag
+      register: istat_menus_quarantine
+      failed_when: istat_menus_quarantine.rc != 0 and "No such xattr" not in istat_menus_quarantine.stderr
+      changed_when: istat_menus_quarantine.rc == 0
+      command: xattr -d com.apple.quarantine /Applications/iStat\ Menus.app
+      tags:
+        - istat-menus
+
+    - name: Start application
+      when: istat_menus_started
+      changed_when: False
+      command: open -j /Applications/iStat\ Menus.app
+      tags:
+        - istat-menus
+
+...
