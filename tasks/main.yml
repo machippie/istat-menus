@@ -20,19 +20,12 @@
       tags:
         - istat-menus
 
-    - name: Remove quarantine flag
-      register: istat_menus_quarantine
-      failed_when: istat_menus_quarantine.rc != 0 and "No such xattr" not in istat_menus_quarantine.stderr
-      changed_when: istat_menus_quarantine.rc == 0
-      command: xattr -d com.apple.quarantine /Applications/iStat\ Menus.app
-      tags:
-        - istat-menus
-
-    - name: Start application
-      when: istat_menus_started
-      changed_when: False
-      command: open -j /Applications/iStat\ Menus.app
-      tags:
-        - istat-menus
+- name: Remove quarantine flag
+  register: istat_menus_quarantine
+  failed_when: istat_menus_quarantine.rc != 0 and "No such xattr" not in istat_menus_quarantine.stderr
+  changed_when: istat_menus_quarantine.rc == 0
+  command: xattr -d com.apple.quarantine /Applications/iStat\ Menus.app
+  tags:
+    - istat-menus
 
 ...
